@@ -9,6 +9,7 @@ from filters.filters import severity_filter, bug_filter
 from keyboards.bugreport_keys import bugreport_kb
 from keyboards.checklist_keys import checklist_severe_kb
 from keyboards.main_keys import first_kb, reject_kb
+from handlers import start_hand
 
 bot = all_data().get_bot()
 
@@ -31,6 +32,7 @@ router.message.filter(state = bugreport_state)
 @router.message(F.text == "Back to start")
 async def ch_clear(message: types.Message, state: FSMContext):
     await state.clear()
+    await state.set_state(start_hand.security_state.passed)
     await message.answer('Never stop to QA!', reply_markup=first_kb())
 
 
@@ -94,6 +96,8 @@ async def bug_attach_photo(message: types.Message, state: FSMContext):
     final_data = await state.update_data(attachment=f'bug_{filename["id"]}')
     x = bugreport_insert(final_data, message.from_user.id)
     await message.answer(f'All done, bug {x} updated', reply_markup=first_kb())
+    await state.clear()
+    await state.set_state(start_hand.security_state.passed)
 
 
 @router.message(F.text == 'None', state=bugreport_state.attachments)
@@ -101,5 +105,6 @@ async def bug_attach_none(message: types.Message, state: FSMContext):
     final_data = await state.update_data(attachment='None')
     x = bugreport_insert(final_data, message.from_user.id)
     await message.answer(f'All done, bug {x} updated', reply_markup=first_kb())
-
+    await state.clear()
+    await state.set_state(start_hand.security_state.passed)
 

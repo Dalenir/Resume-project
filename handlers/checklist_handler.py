@@ -9,6 +9,7 @@ from ResumeBot import all_data
 from filters.filters import severity_filter
 from keyboards.checklist_keys import checklist_kb, checklist_severe_kb, checklist_passed_kb
 from keyboards.main_keys import first_kb, reject_kb
+from handlers import start_hand
 
 bot = all_data().get_bot()
 
@@ -29,6 +30,7 @@ router.message.filter(state = checklist_state)
 @router.message(F.text == "Back to start")
 async def ch_clear(message: types.Message, state: FSMContext):
     await state.clear()
+    await state.set_state(start_hand.security_state.passed)
     await message.answer('Never stop to QA!', reply_markup=first_kb())
 
 
@@ -82,4 +84,5 @@ async def ch_passed(message: types.Message, state: FSMContext):
     if len (result) > 1:
         await message.answer(f'Number of your bug will be {result[1]}', reply_markup=first_kb())
     await state.clear()
+    await state.set_state(start_hand.security_state.passed)
     await message.answer('Well done! Another one?', reply_markup=first_kb())
